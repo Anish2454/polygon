@@ -2,96 +2,113 @@ from display import *
 from matrix import *
 from math import *
 
+def add_polygon( points, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
+    pass
+
+def draw_polygons( points, screen, color ):
+    pass
+
 def add_box( points, x, y, z, width, height, depth ):
+    x1 = x + width
+    y1 = y - height
+    z1 = z - depth
 
-    vertTLF = [x,y,z]
-    vertTRF = [x+width, y, z]
-    vertBLF = [x,y-height, z]
-    vertBRF = [x+width, y-height, z]
+    #front
+    add_edge(points, x, y, z, x1, y, z)
+    add_edge(points, x, y1, z, x1, y1, z)
+    add_edge(points, x1, y, z, x1, y1, z)
+    add_edge(points, x, y, z, x, y1, z)
 
-    vertTLB = [x,y,z-depth]
-    vertTRB = [x+width, y, z-depth]
-    vertBLB = [x, y-height, z-depth]
-    vertBRB = [x+width, y-height, z-depth]
+    #back
+    add_edge(points, x, y, z1, x1, y, z1)
+    add_edge(points, x, y1, z1, x1, y1, z1)
+    add_edge(points, x1, y, z1, x1, y1, z1)
+    add_edge(points, x, y, z1, x, y1, z1)
 
-    add_edge(points, x, y, z, x+width, y, z)
-    add_edge(points, x, y, z, x, y-height, z)
-    add_edge(points, x, y, z, x, y, z-depth)
+    #sides
+    add_edge(points, x, y, z, x, y, z1)
+    add_edge(points, x1, y, z, x1, y, z1)
+    add_edge(points, x, y1, z, x, y1, z1)
+    add_edge(points, x1, y1, z, x1, y1, z1)
 
-    add_edge(points, x+width, y, z, x+width, y-height, z)
-    add_edge(points, x+width, y, z, x+width, y, z-depth)
+def add_sphere( edges, cx, cy, cz, r, step ):
+    points = generate_sphere(cx, cy, cz, r, step)
 
-    add_edge(points, x, y-height, z, x+width, y-height, z)
-    add_edge(points, x, y-height, z, x, y-height, z-depth)
+    lat_start = 0
+    lat_stop = step
+    longt_start = 0
+    longt_stop = step
 
-    add_edge(points, x+width, y-height, z, x+width, y-height, z-depth)
+    step+= 1
+    for lat in range(lat_start, lat_stop):
+        for longt in range(longt_start, longt_stop+1):
+            index = lat * step + longt
 
-    add_edge(points, x+width, y-height, z-depth, x, y-height, z-depth)
-    add_edge(points, x+width, y-height, z-depth, x+width, y, z-depth)
+            add_edge(edges, points[index][0],
+                     points[index][1],
+                     points[index][2],
+                     points[index][0]+1,
+                     points[index][1]+1,
+                     points[index][2]+1 )
 
-    add_edge(points, x, y, z-depth, x, y-height, z-depth)
-    add_edge(points, x, y, z-depth, x+width, y, z-depth)
+def generate_sphere( cx, cy, cz, r, step ):
+    points = []
 
+    rot_start = 0
+    rot_stop = step
+    circ_start = 0
+    circ_stop = step
 
-def add_sphere(points, cx, cy, cz, r, step ):
-    surface = generate_sphere(cx, cy, cz, r, step)
-    for point in surface:
-        x0 = point[0]
-        y0 = point[1]
-        z0 = point[2]
-        x1 = x0 + 1
-        y1 = y0
-        z1 = z0
-        add_edge(points, x0, y0, z0, x1, y1, z1)
+    for rotation in range(rot_start, rot_stop):
+        rot = rotation/float(step)
+        for circle in range(circ_start, circ_stop+1):
+            circ = circle/float(step)
 
+            x = r * math.cos(math.pi * circ) + cx
+            y = r * math.sin(math.pi * circ) * math.cos(2*math.pi * rot) + cy
+            z = r * math.sin(math.pi * circ) * math.sin(2*math.pi * rot) + cz
 
-def generate_sphere(cx, cy, cz, r, step ):
-    surface = []
-    theta_step = 1.0
-    while theta_step <= step:
-        phi_step = 1.0
-        theta = 2 * math.pi * (theta_step / step)
-        while phi_step <= step:
-            phi = math.pi * (phi_step / step)
+            points.append([x, y, z])
+            #print 'rotation: %d\tcircle%d'%(rotation, circle)
+    return points
 
-            x = r * math.cos(theta) + cx
-            y = r * math.sin(theta) * math.cos(phi) + cy
-            z = r * math.sin(theta) * math.sin(phi) + cz
+def add_torus( edges, cx, cy, cz, r0, r1, step ):
+    points = generate_torus(cx, cy, cz, r0, r1, step)
 
-            surface.append([x, y, z])
-            phi_step += 1.0
-        theta_step += 1.0
-    return surface
+    lat_start = 0
+    lat_stop = step
+    longt_start = 0
+    longt_stop = step
 
+    for lat in range(lat_start, lat_stop):
+        for longt in range(longt_start, longt_stop):
+            index = lat * step + longt
 
-def add_torus( points, cx, cy, cz, r0, r1, step ):
-    surface = generate_torus(cx, cy, cz, r0, r1, step)
-    for point in surface:
-        x0 = point[0]
-        y0 = point[1]
-        z0 = point[2]
-        x1 = x0 + 1
-        y1 = y0
-        z1 = z0
-        add_edge(points, x0, y0, z0, x1, y1, z1)
+            add_edge(edges, points[index][0],
+                     points[index][1],
+                     points[index][2],
+                     points[index][0]+1,
+                     points[index][1]+1,
+                     points[index][2]+1 )
 
-def generate_torus(cx, cy, cz, r0, r1, step ):
-    surface = []
-    theta_step = 1.0
-    while theta_step <= step:
-        phi_step = 1.0
-        theta = 2 * math.pi * (theta_step / step)
-        while phi_step <= step:
-            phi = 2 * math.pi * (phi_step / step)
+def generate_torus( cx, cy, cz, r0, r1, step ):
+    points = []
+    rot_start = 0
+    rot_stop = step
+    circ_start = 0
+    circ_stop = step
 
-            x = (((r0 * math.cos(theta)) + r1) * math.cos(phi)) + cx
-            y = (r0 * math.sin(theta)) + cy
-            z = (((r0 * math.cos(theta)) + r1) * -1 * math.sin(phi)) + cz
+    for rotation in range(rot_start, rot_stop):
+        rot = rotation/float(step)
+        for circle in range(circ_start, circ_stop):
+            circ = circle/float(step)
 
-            surface.append([x, y, z])
-            phi_step += 1.0
-        theta_step += 1.0
-    return surface
+            x = math.cos(2*math.pi * rot) * (r0 * math.cos(2*math.pi * circ) + r1) + cx;
+            y = r0 * math.sin(2*math.pi * circ) + cy;
+            z = -1*math.sin(2*math.pi * rot) * (r0 * math.cos(2*math.pi * circ) + r1) + cz;
+
+            points.append([x, y, z])
+    return points
 
 def add_circle( points, cx, cy, cz, r, step ):
     x0 = r + cx
@@ -123,18 +140,18 @@ def add_curve( points, x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
         y0 = y
         i+= 1
 
+
 def draw_lines( matrix, screen, color ):
     if len(matrix) < 2:
         print 'Need at least 2 points to draw'
         return
-
     point = 0
     while point < len(matrix) - 1:
         draw_line( int(matrix[point][0]),
                    int(matrix[point][1]),
                    int(matrix[point+1][0]),
                    int(matrix[point+1][1]),
-                   screen, color)
+                   screen, color)    
         point+= 2
 
 def add_edge( matrix, x0, y0, z0, x1, y1, z1 ):
@@ -143,8 +160,6 @@ def add_edge( matrix, x0, y0, z0, x1, y1, z1 ):
 
 def add_point( matrix, x, y, z=0 ):
     matrix.append( [x, y, z, 1] )
-
-
 
 
 def draw_line( x0, y0, x1, y1, screen, color ):
@@ -167,7 +182,7 @@ def draw_line( x0, y0, x1, y1, screen, color ):
     if ( abs(x1-x0) >= abs(y1 - y0) ):
 
         #octant 1
-        if A > 0:
+        if A > 0:            
             d = A + B/2
 
             while x < x1:
