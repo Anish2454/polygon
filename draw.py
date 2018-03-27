@@ -7,8 +7,8 @@ def add_polygon( points, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(points, x1, y1, z1)
     add_point(points, x2, y2, z2)
 
-def draw_polygons( points, screen, color ):
-    if len(points) < 3:
+def draw_polygons( matrix, screen, color ):
+    if len(matrix) < 3:
     	print "Need at least 3 points"
     point = 0
     while point < len(matrix) - 1:
@@ -36,26 +36,26 @@ def add_box( points, x, y, z, width, height, depth ):
     z1 = z - depth
 
     #front
-    add_edge(points, x, y, z, x1, y, z)
-    add_edge(points, x, y1, z, x1, y1, z)
-    add_edge(points, x1, y, z, x1, y1, z)
-    add_edge(points, x, y, z, x, y1, z)
-    
     add_polygon(points, x1, y, z, x, y, z, x, y1, z)
     add_polygon(points, x1, y, z, x, y1, z, x1, y1, z)
     
-
     #back
-    add_edge(points, x, y, z1, x1, y, z1)
-    add_edge(points, x, y1, z1, x1, y1, z1)
-    add_edge(points, x1, y, z1, x1, y1, z1)
-    add_edge(points, x, y, z1, x, y1, z1)
-
+    add_polygon(points, x1, y, z1, x, y1, z1, x1, y1, z1)
+    add_polygon(points, x1, y, z1, x, y, z1, x, y1, z1)
+    
     #sides
-    add_edge(points, x, y, z, x, y, z1)
-    add_edge(points, x1, y, z, x1, y, z1)
-    add_edge(points, x, y1, z, x, y1, z1)
-    add_edge(points, x1, y1, z, x1, y1, z1)
+    add_polygon(points, x1, y, z1, x1, y, z, x1, y1, z)
+    add_polygon(points, x1, y, z1, x1, y1, z, x1, y1, z1)
+    add_polygon(points, x, y, z1, x, y, z, x, y1, z)
+    add_polygon(points, x, y, z1, x, y1, z, x, y1, z1)
+    
+    #top
+    add_polygon(points, x, y, z1, x, y, z, x1, y, z)
+    add_polygon(points, x1, y, z1, x, y, z1, x1, y, z)
+    
+    #bottom
+    add_polygon(points, x, y1, z1, x, y1, z, x1, y1, z)
+    add_polygon(points, x1, y1, z1, x, y1, z1, x1, y1, z)
 
 def add_sphere( edges, cx, cy, cz, r, step ):
     points = generate_sphere(cx, cy, cz, r, step)
