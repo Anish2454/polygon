@@ -12,21 +12,31 @@ def draw_polygons( matrix, screen, color ):
     	print "Need at least 3 points"
     point = 0
     while point < len(matrix) - 1:
-        draw_line( int(matrix[point][0]),
-                   int(matrix[point][1]),
-                   int(matrix[point+1][0]),
-                   int(matrix[point+1][1]),
-                   screen, color)
-        draw_line( int(matrix[point+1][0]),
-                   int(matrix[point+1][1]),
-                   int(matrix[point+2][0]),
-                   int(matrix[point+2][1]),
-                   screen, color)
-        draw_line( int(matrix[point+2][0]),
-                   int(matrix[point+2][1]),
-                   int(matrix[point][0]),
-                   int(matrix[point][1]),
-                   screen, color)
+        p0 = matrix[point]
+        p1 = matrix[point+1]
+        p2 = matrix[point+2]
+
+        A = [(p1[0] - p0[0]), (p1[1] - p0[1]), (p1[2] - p0[2])]
+        B = [(p2[0] - p0[0]), (p2[1] - p0[1]), (p2[2] - p0[2])]
+
+        N = cross_product(A, B)
+
+        if N[2] > 0:
+            draw_line( int(p0[0]),
+                       int(p0[1]),
+                       int(p1[0]),
+                       int(p1[1]),
+                       screen, color)
+            draw_line( int(p1[0]),
+                       int(p1[1]),
+                       int(p2[0]),
+                       int(p2[1]),
+                       screen, color)
+            draw_line( int(p2[0]),
+                       int(p2[1]),
+                       int(p0[0]),
+                       int(p0[1]),
+                       screen, color)
         point+= 3
 
 
